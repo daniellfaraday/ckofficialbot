@@ -4,6 +4,7 @@
 
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from pyrogram.errors import UserNotParticipant
 from bot import Translation, LOGGER # pylint: disable=import-error
 from bot.database import Database # pylint: disable=import-error
 
@@ -18,6 +19,38 @@ async def start(bot, update):
         file_uid = False
     
     if file_uid:
+        try:
+            member = await bot.get_chat_member("CK_Links", update.chat.id)
+            if member.status == "kicked":
+                await bot.send_message(
+                       chat_id=update.chat.id,
+                       text="**You're  B A N N E D**",
+                       parse_mode='markdown',
+                       reply_to_message_id=update.message_id
+                       )
+                return
+
+        except UserNotParticipant:
+            me = await bot.get_me()
+            await bot.send_message(
+                    chat_id=update.chat.id,
+                    text=Translation.FORCE_SUB_TEXT,
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Join Channel",url="https://t.me/CK_Links")],
+                                                       [InlineKeyboardButton(text="Refresh", url=f"https://t.me/{me.username}?start={file_uid}")]]),
+                    reply_to_message_id=update.message_id
+                    )
+            return
+
+        except Exception:
+            print('Unable to Verify')
+            await bot.send_message(
+                     chat_id=update.chat.id,
+                     text="```Something Went Wrong```",
+                     parse_mode='markdown',
+                     reply_to_message_id=update.message_id
+                     )
+            return
+
         file_id, file_name, file_caption, file_type = await db.get_file(file_uid)
         
         if (file_id or file_type) == None:
@@ -28,18 +61,8 @@ async def start(bot, update):
             await update.reply_cached_media(
                 file_id,
                 quote=True,
-                caption = caption,
-                parse_mode="html",
-                reply_markup=InlineKeyboardMarkup(
-                    [
-                        [
-                            InlineKeyboardButton
-                                (
-                                    'Developers', url="https://t.me/CrazyBotsz"
-                                )
-                        ]
-                    ]
-                )
+                caption=caption,
+                parse_mode="html"
             )
         except Exception as e:
             await update.reply_text(f"<b>Error:</b>\n<code>{e}</code>", True, parse_mode="html")
@@ -47,27 +70,21 @@ async def start(bot, update):
         return
 
     buttons = [[
-        InlineKeyboardButton('Developers', url='https://t.me/CrazyBotsz'),
-        InlineKeyboardButton('Source Code 🧾', url ='https://github.com/CrazyBotsz/Adv-Auto-Filter-Bot-V2')
-    ],[
-        InlineKeyboardButton('Support 🛠', url='https://t.me/CrazyBotszGrp')
-    ],[
-        InlineKeyboardButton('Help ⚙', callback_data="help")
+        InlineKeyboardButton('Close 🔐', callback_data="close")
     ]]
     
     reply_markup = InlineKeyboardMarkup(buttons)
     
     await bot.send_message(
         chat_id=update.chat.id,
-        text=Translation.START_TEXT.format(
-                update.from_user.first_name),
+        text=Translation.START_TEXT,
         reply_markup=reply_markup,
         parse_mode="html",
         reply_to_message_id=update.message_id
     )
 
 
-@Client.on_message(filters.command(["help"]) & filters.private, group=1)
+#@Client.on_message(filters.command(["help"]) & filters.private, group=1)
 async def help(bot, update):
     buttons = [[
         InlineKeyboardButton('Home ⚡', callback_data='start'),
@@ -87,7 +104,7 @@ async def help(bot, update):
     )
 
 
-@Client.on_message(filters.command(["about"]) & filters.private, group=1)
+#@Client.on_message(filters.command(["about"]) & filters.private, group=1)
 async def about(bot, update):
     
     buttons = [[
