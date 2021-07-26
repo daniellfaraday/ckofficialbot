@@ -35,7 +35,7 @@ async def start(bot, update):
             await bot.send_message(
                     chat_id=update.chat.id,
                     text=Translation.FORCE_SUB_TEXT,
-                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Join Channel",url="https://t.me/CK_Links")],
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Join Channel",url="https://t.me/CK_Anime")],
                                                        [InlineKeyboardButton(text="Refresh", url=f"https://t.me/{me.username}?start={file_uid}")]]),
                     reply_to_message_id=update.message_id
                     )
