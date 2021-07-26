@@ -20,7 +20,7 @@ async def start(bot, update):
     
     if file_uid:
         try:
-            member = await bot.get_chat_member("CK_Links", update.chat.id)
+            member = await bot.get_chat_member("CK_Anime", update.chat.id)
             if member.status == "kicked":
                 await bot.send_message(
                        chat_id=update.chat.id,
